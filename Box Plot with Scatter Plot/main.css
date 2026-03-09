@@ -1,0 +1,329 @@
+/* ===================================================================
+   Spotfire Mod: Box Plot with Jittered Points
+   =================================================================== */
+
+/* ------------------------------
+   Root variables (defaults)
+   ------------------------------ */
+* { box-sizing: border-box; }
+:root {
+  --split-border-width: 1.25px;
+  --split-border-color: #8a8a8a;
+  --grid-border-color: #ededed;
+  --thead-border-color: #dedede;
+  --label-col-width: 96px;
+  --row-height: 26px;
+  --header-top-height: 0px;
+  --plot-gridline-color: rgba(200, 200, 200, 0.6);
+  --trellis-columns: 2;
+  --panel-header-height: 28px;
+  --safe-bottom-area: 22px;
+}
+
+/* ------------------------------
+   Container sizing (viewport-based, original style)
+   ------------------------------ */
+body {
+  white-space: pre-line;
+  margin: 10px;
+  overflow: hidden;
+  position: relative;
+  font-family: Arial, sans-serif;
+}
+#border {
+  position: relative;
+  height: calc(100vh - 20px);
+  width: calc(100vw - 20px);
+  padding-bottom: var(--safe-bottom-area);
+}
+
+/* ------------------------------
+   Single-panel canvas and scales
+   ------------------------------ */
+#canvas {
+  position: absolute;
+  left: var(--label-col-width);
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-end;
+  overflow: hidden;
+}
+#x-scale {
+  position: absolute;
+  left: var(--label-col-width);
+  right: 0;
+  bottom: 0;
+  height: 0;
+  display: none !important;
+  z-index: 10;
+}
+#y-scale {
+  position: absolute !important;
+  box-sizing: border-box;
+  top: 0;
+  left: 0;
+  width: var(--label-col-width);
+  height: 100%;
+  border-right: 1px solid #ddd;
+  text-align: right;
+}
+.scale-label {
+  line-height: 10px;
+  font-size: 10px;
+  position: absolute;
+  right: 2px;
+  color: #555;
+}
+.primary-sync-separator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px dashed var(--plot-gridline-color);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ------------------------------
+   Trellis layout
+   ------------------------------ */
+.trellis-mode #canvas,
+.trellis-mode #x-scale,
+.trellis-mode #y-scale { display: none !important; }
+
+#trellis-grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--trellis-columns), 1fr);
+  grid-auto-rows: minmax(420px, auto);
+  gap: 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px;
+}
+.trellis-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #d7d7d7;
+  background: #fff;
+}
+.panel-header {
+  flex: 0 0 var(--panel-header-height);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border-bottom: 1px solid #dedede;
+  background: #f7f8fa;
+}
+.panel-title {
+  font-weight: 600;
+  font-size: 12px;
+  color: #444;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.panel-root {
+  position: relative;
+  flex: 1 1 auto;
+  height: calc(100% - var(--panel-header-height));
+  overflow: hidden;
+}
+.panel-canvas { position: absolute; left: var(--label-col-width); right: 0; top: 0; bottom: 0; overflow: hidden; }
+.panel-x-scale { position: absolute; left: var(--label-col-width); right: 0; bottom: 0; height: 0; display: none !important; z-index: 10; }
+.panel-y-scale { position: absolute !important; box-sizing: border-box; top: 0; left: 0; width: var(--label-col-width); height: 100%; border-right: 1px solid #ddd; text-align: right; }
+
+/* ------------------------------
+   Summary table (labels + values)
+   ------------------------------ */
+.summary-table-wrapper {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: row;
+  z-index: 10;
+  background: none;
+  height: auto;
+}
+.summary-table-wrapper::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--thead-border-color);
+}
+.summary-table-labels {
+  position: relative;
+  width: var(--label-col-width);
+  min-width: var(--label-col-width);
+  max-width: var(--label-col-width);
+  background: #f4f5f7;
+  border-right: var(--split-border-width) solid var(--split-border-color);
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  font-size: 11px;
+}
+/* Header is not clickable (settings opens via gear icon) */
+.summary-table-labels .labels-header {
+  pointer-events: auto;
+  cursor: default;
+  user-select: none;
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 0;
+  background: #f0f2f5;
+  border-bottom: 1px solid var(--thead-border-color);
+}
+.summary-table-labels .labels-rows {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  will-change: transform;
+}
+.summary-table-labels .row-label {
+  height: var(--row-height);
+  line-height: var(--row-height);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 6px;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  color: #3f3f3f;
+  background: #f6f7f9;
+  border-bottom: 1px solid var(--thead-border-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.summary-table-values {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: #fff;
+  position: relative;
+  height: auto;
+}
+.summary-table-values table { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 0; }
+.summary-table-values thead tr { position: sticky; background: #f0f2f5; }
+.summary-table-values thead th {
+  position: sticky;
+  color: #3f3f3f;
+  font-weight: 600;
+  font-size: 11px;
+  text-align: center;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--thead-border-color);
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+}
+.summary-table-values thead tr.thead-row-top th { top: 0; z-index: 3; }
+.summary-table-values thead tr.thead-row-leaf th { top: var(--header-top-height); z-index: 2; }
+.summary-table-values thead tr.thead-row-single th { top: 0; z-index: 3; }
+.summary-table-values thead th.header-top { background: #f0f2f5; }
+.summary-table-values thead th.header-leaf { background: #f6f7f9; }
+.summary-table-values thead th.header-single { background: #f3f4f6; }
+.summary-table-values thead th.header-top.main-split-left,
+.summary-table-values thead th.header-leaf.main-split-left,
+.summary-table-values thead th.header-single.main-split-left,
+.summary-table-values tbody td.main-split-left { border-left: var(--split-border-width) solid var(--split-border-color) !important; }
+.summary-table-values thead th.header-top.main-split-right,
+.summary-table-values thead th.header-leaf.main-split-right,
+.summary-table-values thead th.header-single.main-split-right,
+.summary-table-values tbody td.main-split-right { border-right: var(--split-border-width) solid var(--split-border-color) !important; }
+.summary-table-values tbody td {
+  text-align: center;
+  border-bottom: 1px solid var(--grid-border-color);
+  color: #333;
+  font-size: 11px;
+  background: #fff;
+  height: var(--row-height);
+  padding: 3px 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------------------------------
+   Plot elements
+   ------------------------------ */
+.box-container { flex: 0 0 auto; min-width: 22px; max-width: 52px; margin: 0; }
+.whisker { width: 1px; }
+.cap { height: 1px; }
+.median { height: 2px; }
+.box-rect { border-radius: 2px; box-shadow: none; }
+.dot, .outlier-dot { position: absolute; border-radius: 50%; z-index: 5; }
+.outlier-cross-line { border-radius: 1px; pointer-events: none; }
+.trellis-panel .plot-col { top: 0; bottom: 0; height: 100%; }
+#canvas .main-split-left::before, #canvas .main-split-right::after { content: none !important; }
+
+/* Optional: ensure settings button never clips its child SVG */
+.settings-button { overflow: visible; }
+
+/* ------------------------------
+   Statistical annotations
+   ------------------------------ */
+.annotation-layer { pointer-events: none; }
+.anno-svg { pointer-events: none; }
+.anno-label { color: #222; text-shadow: 0 1px 0 rgba(255,255,255,0.6); font-weight: 700; pointer-events: auto; }
+
+/* ------------------------------
+   Settings button styling (self-contained)
+   ------------------------------ */
+.settings-button {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 9999;
+  width: 28px;
+  height: 28px;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  overflow: visible;
+  color: rgba(55, 65, 81, 0.28);
+  transition: color 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
+}
+.settings-button:hover,
+.settings-button:focus-visible {
+  color: #374151;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  outline: none;
+}
+.settings-button:active { color: #1f2937; }
+.settings-button svg { width: 20px; height: 20px; display: block; }
+
+/* ------------------------------
+   Responsive adjustments (container-scoped vars for safety)
+   ------------------------------ */
+@media (max-width: 600px) {
+  #y-scale { width: 50px; }
+  #canvas { left: 50px; }
+  /* scope responsive defaults to the mod container to avoid global side effects */
+  #border { --label-col-width: 50px; --trellis-columns: 1; }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "box-plot-with-jittered-points",
+  "version": "1.0.0",
+  "description": "Box plots with overlaid jittered points; supports trellis panels, marking, filtering, and configurable summary statistics.",
+  "id": "abbvie-mods-boxplot-jitteredpoints",
+  "spotfire": {
+    "entry": "build/main.js",
+    "supportedVersions": ">=14.0",
+    "localization": ["en"]  
+  },
+  "scripts": {
+    "build": "mods-sdk build",
+    "build:dev": "mods-sdk build --watch --debug",
+    "tsc:dev": "tsc --watch",
+    "server": "mods-dev-server"
+  },
+  "keywords": [
+    "box plot",
+    "scatter",
+    "jitter",
+    "statistics",
+    "trellis",
+    "Spotfire",
+    "visualization"
+  ],
+  "author": "Adish Viju",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@spotfire/mods-api": "~1.3.0",
+    "@spotfire/mods-dev-server": "^1.2.0",
+    "@spotfire/mods-sdk": "^1.1.0",
+    "esbuild": "^0.25.1",
+    "prettier": "^3.3.0",
+    "typescript": "^5.8.2"
+  }
+}

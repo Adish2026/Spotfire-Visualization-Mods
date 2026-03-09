@@ -1,0 +1,70 @@
+{
+  "apiVersion": "1.3",
+  "version": "1.0.0",
+  "name": "Box Plot with Jittered Points",
+  "id": "abbvie-mods-boxplot-jitteredpoints",
+  "icon": "icon.svg",
+  "properties": [
+    { "name": "initDoneFlag", "type": "boolean", "defaultValue": false },
+
+    { "name": "y-axis-mode", "type": "string", "defaultValue": "numeric" },
+    { "name": "split-bars", "type": "boolean", "defaultValue": true },
+    { "name": "jitterWidth", "type": "integer", "defaultValue": 20 },
+
+    { "name": "showYGrid", "type": "boolean", "defaultValue": true },
+    { "name": "showXGrid", "type": "boolean", "defaultValue": true },
+
+    { "name": "summaryStats", "type": "string", "defaultValue": "uniqueCount,median,outlierCount" },
+    { "name": "countMode", "type": "string", "defaultValue": "uniqueDetails" },
+
+
+    { "name": "boxColor", "type": "string", "defaultValue": "#367cff" },
+    { "name": "dotBorderColor", "type": "string", "defaultValue": "#111" },
+    { "name": "outlierBorderColor", "type": "string", "defaultValue": "#d32f2f" },
+
+    { "name": "boxWidth", "type": "integer", "defaultValue": 34 },
+    { "name": "pointSize", "type": "integer", "defaultValue": 4 },
+    { "name": "pointOpacityPct", "type": "integer", "defaultValue": 100 },
+    { "name": "boxStrokeWidth", "type": "integer", "defaultValue": 1 },
+    { "name": "medianColor", "type": "string", "defaultValue": "#ffffff" },
+    { "name": "medianWidth", "type": "integer", "defaultValue": 2 },
+    { "name": "useHollowDots", "type": "boolean", "defaultValue": false },
+
+    { "name": "labelColWidth", "type": "integer", "defaultValue": 96 },
+
+    { "name": "yRangeMode", "type": "string", "defaultValue": "auto" },
+    { "name": "yMinManual", "type": "string", "defaultValue": "" },
+    { "name": "yMaxManual", "type": "string", "defaultValue": "" },
+    { "name": "yIncludeOrigin", "type": "boolean", "defaultValue": true },
+    { "name": "yTickIntervalMode", "type": "string", "defaultValue": "auto" },
+    { "name": "yTickInterval", "type": "string", "defaultValue": "" },
+
+    { "name": "annotationMode",          "type": "string",  "defaultValue": "off" },
+    { "name": "annotationTest",          "type": "string",  "defaultValue": "auto" },
+    { "name": "annotationPAdj",          "type": "string",  "defaultValue": "none" },
+    { "name": "annotationPairs",         "type": "string",  "defaultValue": "" },
+    { "name": "annotationAlpha",         "type": "double",  "defaultValue": 0.05 },
+    { "name": "annotationStarMode",      "type": "string",  "defaultValue": "stars" },
+    { "name": "annotationFontSizePx",    "type": "integer", "defaultValue": 6 },
+    { "name": "annotationLineWidthPx",   "type": "integer", "defaultValue": 1 },
+    { "name": "annotationTopPaddingPct", "type": "integer", "defaultValue": 3 },
+    { "name": "annotationAnchorLabel",   "type": "string",  "defaultValue": "" },
+    { "name": "annotationAnchorIndex",   "type": "integer", "defaultValue": 1 }
+  ],
+  "dataViewDefinition": {
+    "tooltip": { "enabled": true },
+    "colorAxis": { "mode": "categorical"},
+    "axes": [
+      { "name": "X", "mode": "categorical", "placement": "bottom" },
+      { "name": "Y", "mode": "continuous", "placement": "left", "allowMultipleMeasures": false, "allowNonAggregatingMeasures": true },
+      { "name": "Details", "mode": "categorical" },
+      { "name": "Trellis", "mode": "categorical", "placement": "top" }
+    ]
+  },
+  "files": [
+    "index.html",
+    "main.css",
+    "build/main.js",
+    "icon.svg"
+  ]
+}
